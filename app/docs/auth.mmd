@@ -1,0 +1,45 @@
+sequenceDiagram
+    autonumber
+    actor User as Store Manager / Cashier
+    participant POS as Electron POS App
+    participant Keytar as Secure OS Vault (Keytar/SafeStorage)
+    participant API as RTStudio Web API (Django/Auth)
+    participant DB as RTStudio Database
+
+    Note over User, DB: 1. Initial Launch & Registration / Login
+    User->>POS: Opens Electron App (Unregistered)
+    POS->>POS: Read Hardware Fingerprint (CPU ID, Board Serial, MAC)
+    User->>POS: Enters RTStudio Credentials (User/Pass or OAuth)
+    POS->>API: POST /api/v1/pos/register/<br/>{email, password, device_fingerprint, device_name}
+    API->>DB: Authenticate User & Fetch Tenant/Store Context
+    
+    alt User is new / Has no active POS license
+        API->>DB: Create POS Device Record & Start 10-Day Free Trial
+    end
+
+    API->>DB: Generate Device-Bound Tokens (JWT) & Subscription Metadata
+    API-->>POS: Return { access_token, refresh_token, device_id, license_status: "TRIAL", expires_at }
+    
+    POS->>Keytar: Securely Store Access Token, Refresh Token, & Device ID
+    POS-->>User: Navigate to Main POS Dashboard
+
+    Note over POS, API: 2. Subsequent Launches & Daily Usage
+    POS->>Keytar: Retrieve Access Token & License State
+    POS->>POS: Verify local expiration & Hardware Fingerprint
+    
+    alt Token Valid & License Active (Trial or Paid)
+        POS->>API: API Requests with Bearer Token + Device-ID Header
+        API-->>POS: HTTP 200 (Authorized Operation)
+    else Token Expired / Needs Refresh
+        POS->>API: POST /api/v1/pos/token/refresh/ { refresh_token, device_id }
+        API->>DB: Validate Device Binding & Active Subscription Status
+        
+        alt Subscription Expired (Past 10 Days & No Payment)
+            API-->>POS: HTTP 402 Payment Required { license_status: "EXPIRED" }
+            POS->>POS: Lock POS Features (Disable Checkout / Read-Only Mode)
+            POS-->>User: Show "Subscription Expired - Pay to Unlock" Screen
+        else Subscription Active or Perpetual License Valid
+            API-->>POS: Return New Access Token { license_status: "ACTIVE" }
+            POS-->>User: Unlock Full POS Functionality
+        end
+    end

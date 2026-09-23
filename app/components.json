@@ -1,0 +1,24 @@
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "new-york-v4",
+  "rsc": true,
+  "tsx": true,
+  "tailwind": {
+    "config": "renderer/tailwind.config.js",
+    "css": "renderer/styles/globals.css",
+    "baseColor": "slate",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "aliases": {
+    "components": "@/components",
+    "utils": "@/lib/utils"
+  },
+  "registries": {
+    "@shadcn-studio": "https://shadcnstudio.com/r/{style}/{name}.json",
+    "@ss-components": "https://shadcnstudio.com/r/components/{style}/{name}.json",
+    "@ss-blocks": "https://shadcnstudio.com/r/blocks/{style}/{name}.json",
+    "@ss-pages": "https://shadcnstudio.com/r/pages/{style}/{name}.json",
+    "@ss-themes": "https://shadcnstudio.com/r/themes/{name}.json"
+  }
+}

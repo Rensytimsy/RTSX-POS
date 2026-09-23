@@ -1,0 +1,32 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model StoreAccount {
+  id String @id @default(uuid())
+  storename String
+  email String @unique
+  password String
+  phonenumber String
+  companysize Int
+  Devices RegisteredDevice[]
+}
+
+
+model RegisteredDevice {
+  id String @unique
+  name String
+  subscribed Boolean
+  Store StoreAccount @relation(fields: [id], references: [id])
+  fullSettlement Boolean
+}
