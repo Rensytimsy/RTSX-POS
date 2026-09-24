@@ -263,11 +263,11 @@ const Checkout1 = ({ cartItems = CART_ITEMS, className }: Checkout1Props) => {
                 <ProductList1 />
             </div>
 
-            <div className="container w-auto">
+            <div className="container w-3/6">
                 <FormProvider {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)}>
-                        <div className="grid grid-cols-1 gap-0 lg:grid-cols-2 lg:gap-17.5">
-                            <div>
+                        <div className="grid grid-cols-1  gap-0 lg:grid-cols-2 lg:gap-17.5">
+                            <div className="border">
                                 <Cart form={form} cartItems={cartItems} />
                             </div>
                         </div>
@@ -933,15 +933,15 @@ const CartItem = ({
 
     return (
         <Card className="rounded-lg bg-white p-4 shadow-none">
-            <div className="flex w-full h-48 gap-3.5 max-sm:flex-col">
+            <div className="flex w-full h-38 gap-3.5 max-sm:flex-col">
                 <div className="shrink-3 basis-15">
-                    <AspectRatio ratio={1} className="overflow-hidden rounded-lg">
+                    {/* <AspectRatio ratio={1} className="overflow-hidden rounded-lg">
                         <img
                             src={image}
                             alt={name}
                             className="block max-h-[200px] border object-cover object-center"
                         />
-                    </AspectRatio>
+                    </AspectRatio> */}
                 </div>
                 <div className="flex-1">
                     <div className="flex flex-col justify-between gap-3">
@@ -950,7 +950,7 @@ const CartItem = ({
                                 <CardTitle className="text-sm font-medium">
                                     <a href={link}>{name}</a>
                                 </CardTitle>
-                                <ProductDetails details={details} />
+                                {/* <ProductDetails details={details} /> */}
                             </div>
                             <div>
                                 <Price className="text-sm font-semibold">
