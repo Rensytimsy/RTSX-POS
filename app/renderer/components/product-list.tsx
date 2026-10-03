@@ -1,5 +1,5 @@
 import { cn } from "cn";
-
+import { FC } from "react";
 import { Price, PriceValue } from "@/components/shadcnblocks/price";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Badge } from "@/components/ui/badge";
@@ -17,18 +17,12 @@ interface ProductPrice {
 }
 
 interface Product {
-  name: string;
-  image: {
-    src: string;
-    alt: string;
-  };
-  link: string;
-  description: string;
-  price: ProductPrice;
-  badge?: {
-    text: string;
-    color?: string;
-  };
+  barcode: string,
+    name: string,
+    price: string,
+    image: string,
+    stock: number,
+    description?: string,
 }
 
 type ProductCardProps = Product;
@@ -36,136 +30,98 @@ type ProductCardProps = Product;
 type ProductList = Array<Product>;
 
 const PRODUCTS_LIST: ProductList = [
-  {
-    name: "Vexon CoreStep '08 LX",
-    image: {
-      src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/ecommerce/clothes/joshua-diaz-ETNoDLl8yFE-unsplash-1.jpg",
-      alt: "",
+    {
+        "barcode": "012345678901",
+        "name": "Wireless Ergonomic Mouse",
+        "price": "29.99",
+        "image": "https://example.com/images/mouse.jpg",
+        "stock": 45,
+        "description": ""
     },
-    link: "#",
-    description:
-      "Everyday comfort meets bold tri-color style in this performance-driven design.",
-    price: {
-      regular: 499.0,
-      sale: 399.0,
-      currency: "USD",
+    {
+        "barcode": "012345678902",
+        "name": "Mechanical Gaming Keyboard",
+        "price": "79.50",
+        "image": "https://example.com/images/keyboard.jpg",
+        "stock": 12,
+        "description": ""
     },
-    badge: {
-      text: "Selling fast!",
-      color: "oklch(57.7% 0.245 27.325)",
+    {
+        "barcode": "012345678903",
+        "name": "27-Inch 4K Monitor",
+        "price": "349.00",
+        "image": "https://example.com/images/monitor.jpg",
+        "stock": 8,
+        "description": ""
     },
-  },
-  {
-    name: "Urban Chill Jacket",
-    image: {
-      src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/ecommerce/clothes/pexels-cottonbro-6764040-2.jpg",
-      alt: "",
+    {
+        "barcode": "012345678904",
+        "name": "USB-C Multi-Port Hub",
+        "price": "19.99",
+        "image": "https://example.com/images/hub.jpg",
+        "stock": 100,
+        "description": ""
     },
-    link: "#",
-    description:
-      "A denim puffer with tonal blues, perfect for layering across seasons.",
-    price: {
-      regular: 180.0,
-      currency: "USD",
+    {
+        "barcode": "012345678905",
+        "name": "Noise-Canceling Headphones",
+        "price": "129.95",
+        "image": "https://example.com/images/headphones.jpg",
+        "stock": 0,
+        "description": ""
     },
-  },
-  {
-    name: "Maison Liora Bag",
-    image: {
-      src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/ecommerce/clothes/Woman-with-Tote-Bag-1.png",
-      alt: "",
+    {
+        "barcode": "012345678906",
+        "name": "HD Desk Webcam 1080p",
+        "price": "49.99",
+        "image": "https://example.com/images/webcam.jpg",
+        "stock": 23,
+        "description": ""
     },
-    link: "#",
-    description:
-      "A refined bag that easily switches from shoulder to crossbody or top-handle.",
-    price: {
-      regular: 420.0,
-      currency: "USD",
+    {
+        "barcode": "012345678907",
+        "name": "Aluminum Laptop Stand",
+        "price": "34.50",
+        "image": "https://example.com/images/stand.jpg",
+        "stock": 67,
+        "description": ""
     },
-    badge: {
-      text: "New",
+    {
+        "barcode": "012345678908",
+        "name": "Portable External SSD 1TB",
+        "price": "89.99",
+        "image": "https://example.com/images/ssd.jpg",
+        "stock": 15,
+        "description": ""
     },
-  },
-  {
-    name: "Maison Liora Bag",
-    image: {
-      src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/ecommerce/clothes/Woman-with-Tote-Bag-1.png",
-      alt: "",
+    {
+        "barcode": "012345678909",
+        "name": "Smart Desk Power Strip",
+        "price": "24.99",
+        "image": "https://example.com/images/powerstrip.jpg",
+        "stock": 50,
+        "description": ""
     },
-    link: "#",
-    description:
-      "A refined bag that easily switches from shoulder to crossbody or top-handle.",
-    price: {
-      regular: 420.0,
-      currency: "USD",
-    },
-    badge: {
-      text: "New",
-    },
-  },
-  {
-    name: "Maison Liora Bag",
-    image: {
-      src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/ecommerce/clothes/Woman-with-Tote-Bag-1.png",
-      alt: "",
-    },
-    link: "#",
-    description:
-      "A refined bag that easily switches from shoulder to crossbody or top-handle.",
-    price: {
-      regular: 420.0,
-      currency: "USD",
-    },
-    badge: {
-      text: "New",
-    },
-  },
-  {
-    name: "Maison Liora Bag",
-    image: {
-      src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/ecommerce/clothes/Woman-with-Tote-Bag-1.png",
-      alt: "",
-    },
-    link: "#",
-    description:
-      "A refined bag that easily switches from shoulder to crossbody or top-handle.",
-    price: {
-      regular: 420.0,
-      currency: "USD",
-    },
-    badge: {
-      text: "New",
-    },
-  },
-  {
-    name: "Maison Liora Bag",
-    image: {
-      src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/ecommerce/clothes/Woman-with-Tote-Bag-1.png",
-      alt: "",
-    },
-    link: "#",
-    description:
-      "A refined bag that easily switches from shoulder to crossbody or top-handle.",
-    price: {
-      regular: 420.0,
-      currency: "USD",
-    },
-    badge: {
-      text: "New",
-    },
-  },
+    {
+        "barcode": "012345678910",
+        "name": "Extended Desk Pad Mat",
+        "price": "14.99",
+        "image": "https://example.com/images/deskpad.jpg",
+        "stock": 85,
+        "description": ""
+    }
 ];
 
 interface ProductList1Props {
   className?: string;
 }
 
-const ProductList1 = ({ className }: ProductList1Props) => {
+const ProductList1:FC<{productlist: Product[]}> = ({productlist}) => {
   return (
-    <section className={cn("py-32", className)}>
-      <div className="container">
-        <div className="grid place-items-center gap-6 md:grid-cols-2 xl:grid-cols-5">
-          {PRODUCTS_LIST.map((item, index) => (
+    <section className={cn("py-32")}>
+      <div className="">
+        <div className="grid place-items-center gap-6 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
+          {productlist?.map((item, index) => (
             <ProductCard key={`product-list-1-card-${index}`} {...item} />
           ))}
         </div>
@@ -177,25 +133,21 @@ const ProductList1 = ({ className }: ProductList1Props) => {
 const ProductCard = ({
   name,
   description,
-  link,
   image,
-  badge,
   price,
 }: ProductCardProps) => {
-  const { regular, sale, currency } = price;
 
   return (
     <a
-      href={link}
-      className="block h-full w-full max-w-md transition-opacity hover:opacity-80"
+      className="block h-full min-w-62 transition-opacity hover:opacity-80"
     >
       <Card className="h-full overflow-hidden p-0">
         <CardHeader className="relative block p-0">
-          <AspectRatio ratio={1.268115942} className="overflow-hidden">
+          <AspectRatio ratio={1.2555} className="overflow-hidden">
             <img
-              src={image.src}
-              alt={image.alt}
-              className="block size-full object-cover ratio-1 object-center"
+              src={image}
+              alt={image}
+              className="block size-full object-contain ratio-2 object-center"
             />
           </AspectRatio>
           {/* {badge && (
@@ -210,16 +162,15 @@ const ProductCard = ({
           )} */}
         </CardHeader>
         <CardContent className="flex h-full flex-col gap-4 pb-6">
-          <CardTitle className="text-xl font-semibold">{name}</CardTitle>
+          <CardTitle className="text-xl font-semibold">{name.slice(0, 10)}....</CardTitle>
           {/* <CardDescription className="font-medium text-muted-foreground">
             {description}
           </CardDescription> */}
           <div className="mt-auto">
-            <Price onSale={sale != null} className="text-lg font-semibold">
-              <PriceValue price={sale} currency={currency} variant="sale" />
+            <Price>
+              <PriceValue price={price} variant="sale" />
               <PriceValue
-                price={regular}
-                currency={currency}
+                price={price}
                 variant="regular"
               />
             </Price>

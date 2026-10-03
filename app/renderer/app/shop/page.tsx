@@ -1,9 +1,10 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Minus, Plus, Trash } from "lucide-react";
+import { Minus, Plus, Trash, Terminal, Barcode, Trash2, ShoppingCart } from "lucide-react";
 import { useCallback, useState } from "react";
 import type { UseFormReturn } from "react-hook-form";
+import { useEffect } from "react";
 import {
     Controller,
     FormProvider,
@@ -21,6 +22,7 @@ import {
 } from "@/components/shadcnblocks/logo";
 import { Price, PriceValue } from "@/components/shadcnblocks/price";
 import QuantityInput from "@/components/shadcnblocks/quantity-input";
+import { ChangeEvent } from "react";
 import {
     Accordion,
     AccordionContent,
@@ -71,7 +73,6 @@ interface CartItemProps extends CartItem {
 
 interface CartProps {
     cartItems: CartItem[];
-    form: UseFormReturn<CheckoutFormType>;
 }
 
 const PAYMENT_METHODS = {
@@ -219,9 +220,121 @@ interface Checkout1Props {
     className?: string;
 }
 
+type ExpectedData = {
+    barcode: string
+}
+
+const text_barcodes = [
+    {
+        "barcode": "012345678901",
+        "name": "Wireless Ergonomic Mouse",
+        "price": "29.99",
+        "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSavea4lk1z6VWuEx6L5rMkrMXT4iqlBCIgTaT7DyRPog&s=10",
+        "stock": 45,
+        "description": "",
+        "id": "1"
+    },
+    {
+        "barcode": "012345678902",
+        "name": "Mechanical Gaming Keyboard",
+        "price": "79.50",
+        "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQWeojVwp0-ONMxdCKWZldf6sFzfShO9Ok6EMH1hgG_sA&s=10",
+        "stock": 12,
+        "description": "",
+        "id": "2"
+    },
+    {
+        "barcode": "012345678903",
+        "name": "27-Inch 4K Monitor",
+        "price": "349.00",
+        "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrlsVipVIsDgH8hRRbCd_d2BAdFMalVX6VdpaetNVz6A&s=10",
+        "stock": 8,
+        "description": "",
+        "id": "3"
+    },
+    {
+        "barcode": "012345678904",
+        "name": "USB-C Multi-Port Hub",
+        "price": "19.99",
+        "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4vgCRygZzDBwsnUN8gJHbufUw6KZL-Q8I74CbCJogpg&s=10",
+        "stock": 100,
+        "description": "",
+        "id": "4"
+    },
+    {
+        "barcode": "012345678905",
+        "name": "Noise-Canceling Headphones",
+        "price": "129.95",
+        "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTQv6sCSGjrND-CobcOCoT8cbC_RGghXgyQ-LAEL3DHFg&s=10",
+        "stock": 0,
+        "description": "",
+        "id": "5"
+    },
+    {
+        "barcode": "012345678906",
+        "name": "HD Desk Webcam 1080p",
+        "price": "49.99",
+        "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5HsnPmKHwYnIINWsAb4ktSBKq96ciFxWvRVJLcsKuNA&s=10",
+        "stock": 23,
+        "description": "",
+        "id": "6"
+    },
+    {
+        "barcode": "012345678907",
+        "name": "Aluminum Laptop Stand",
+        "price": "34.50",
+        "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT9kpE16WmLqK0A0VjKQ-IXQPfD1KL7Rrt8JTar1UtfQQ&s=10",
+        "stock": 67,
+        "description": "",
+        "id": "7"
+    },
+    {
+        "barcode": "012345678908",
+        "name": "Portable External SSD 1TB",
+        "price": "89.99",
+        "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRHb_-cHUulH7gMXGKNToV6hQqiWhGPXpzAoEP8IRaVOA&s=10",
+        "stock": 15,
+        "description": "",
+        "id": "8"
+    },
+    {
+        "barcode": "012345678909",
+        "name": "Smart Desk Power Strip",
+        "price": "24.99",
+        "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSEf_lOHjhN9Xm5jJCK9Bks12kOvkvpLhkuYBJYokf0Bw&s=10",
+        "stock": 50,
+        "description": "",
+        "id": "9"
+    },
+    {
+        "barcode": "012345678910",
+        "name": "Extended Desk Pad Mat",
+        "price": "14.99",
+        "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSRBoZuDjcu51kht3Rn2GSthKCMG6hGEzm8hZkt8N-pHg&s",
+        "stock": 85,
+        "description": "",
+        "id": "10"
+    }
+]
+
+type ProductItem = {
+    barcode: string,
+    name: string,
+    price: string,
+    image: string,
+    stock: number,
+    description?: string,
+    id?: string
+
+}
+
 const Checkout1 = ({ cartItems = CART_ITEMS, className }: Checkout1Props) => {
     const [activeAccordion, setActiveAccordion] = useState("item-1");
     const [barcode, setBarcode] = useState('');
+    const [wsRes, setWsRes] = useState();
+    const [recentPurchases, setRecentPurchases] = useState<ExpectedData[]>([]);
+    const [purchaseLogs, setPurchaseLogs] = useState<ProductItem[]>([]);
+
     const defaultProducts = cartItems.map((item) => ({
         product_id: item.product_id,
         quantity: item.quantity,
@@ -250,29 +363,193 @@ const Checkout1 = ({ cartItems = CART_ITEMS, className }: Checkout1Props) => {
         setActiveAccordion(value);
     };
 
+    const total = text_barcodes.reduce((sum, item) => {
+        const price = Number(item.price) || 0;
+        const qty =  1;
+        return sum + price * qty;
+    }, 0);
+
+
+    const findScannedItem = (scannedBarcode: string) => {
+        const product = text_barcodes.find((product) => product.barcode === scannedBarcode);
+        setPurchaseLogs((prevPurchase) => [
+            ...prevPurchase,
+            {
+                name: product.name,
+                price: product.price,
+                barcode: product.barcode,
+                image: product.image,
+                stock: product.stock
+            }])
+        console.log(product.name)
+    }
+
+    useEffect(() => {
+        const wsScanner = async () => {
+            const wsConn = new WebSocket("ws://127.0.0.1:8000/ws/scanner/kfjsakfsdf/");
+            wsConn.onopen = () => console.log("successfuly connected!");
+            wsConn.onclose = () => console.log("disconnected!")
+
+            console.log("inside useEffect hook", barcode)
+
+            if (barcode.length >= 10) {
+                wsConn.send(JSON.stringify({
+                    "type": "broadcast.scan.event",
+                    "barcode": barcode
+                }));
+            }
+
+            wsConn.onmessage = (event) => {
+                console.log("debugger", event.data)
+                const data: ExpectedData = JSON.parse(event.data);
+                findScannedItem(data.barcode);
+                setRecentPurchases((prevState) => [...prevState, { barcode: data.barcode }]);
+            };
+            wsConn.onerror = (error) => console.error(error)
+        };
+
+        wsScanner();
+    }, [barcode])
+
+    console.log("ws res", recentPurchases)
+    console.log(purchaseLogs[0]?.name)
+
+
     return (
         <section className={cn("py-10 flex flex-row align-center justify-center gap-8 min-h-screen w-full px-4", className)}>
-            <div className="relative border w-2/6 text-center">
-                <p>recent purchases</p>
+            <div className="flex flex-col w-full max-w-xs h-full bg-white rounded-lg h-screen text-slate-300 font-mono text-xs">
+
+                {/* Log Header */}
+                <div className="flex items-center justify-between px-3 py-2 bg-white">
+                    <div className="flex items-center gap-1.5 text-slate-400">
+                        <Terminal className="w-3.5 h-3.5 text-secondary" />
+                        <span className="font-extrabold uppercase tracking-wider text-sm text-secondary">Scan Logs</span>
+                    </div>
+                    <span className="text-sm text-secondary">{purchaseLogs.length} entries</span>
+                </div>
+
+                {/* Simple Log Stream */}
+                <div className="flex-1 overflow-y-auto p-2 space-y-1 divide-y divide-slate-800/40">
+                    {purchaseLogs.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center h-32 text-slate-600 text-center">
+                            <Barcode className="w-8 h-8 mb-1 text-gray-400" />
+                            <span>Waiting for scans ...</span>
+                        </div>
+                    ) : (
+                        purchaseLogs.map((item: ProductItem, idx: number) => (
+                            <div key={idx} className="pt-1 flex items-center justify-between text-slate-300 hover:text-white">
+                                <div className="flex items-center gap-2 truncate">
+                                    <span className="text-slate-600 text-sm">#{idx + 1}</span>
+                                    <span className="text-secondary truncate">{item.name}</span>
+                                </div>
+                                <span className="text-secondary font-semibold shrink-0 ml-2">
+                                    {`${item.name}-${item.barcode}-${item.price ? Number(item.price).toFixed(2) : "0.00"}`}
+                                </span>
+                            </div>
+                        ))
+                    )}
+                </div>
+
+                {/* Minimal Footer */}
+                <div className="px-3 py-1.5  text-center">
+                    <button className="text-md text-secondary hover:text-secondary underline underline-offset-2">
+                        view full log history
+                    </button>
+                </div>
+
             </div>
 
             <div className="relative">
                 <div className="absolute right-0 rounded-sm border border-4 border-soft p-2 w-1/5">
-                    <input type="text" placeholder="paste product bar code...." id="" className="outline-none"/>
+                    <input type="text" placeholder="paste product bar code...." id="" className="outline-none" />
                 </div>
-                <ProductList1 />
+                <div className="text-blue-400 underline hover:cursor-pointer hover:text-blue-600">
+                    <p className="text-blue-400 underline hover:cursor-pointer hover:text-blue-600">backup scanner</p>
+                    <input type="text" onChange={(e: ChangeEvent<HTMLInputElement>) => setBarcode(e.target.value)} />
+                    {/* <button>add to cart</button> */}
+                </div>
+
+                <ProductList1 productlist={purchaseLogs} />
             </div>
 
-            <div className="container w-3/6">
-                <FormProvider {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)}>
-                        <div className="grid grid-cols-1  gap-0 lg:grid-cols-2 lg:gap-17.5">
-                            <div className="border">
-                                <Cart form={form} cartItems={cartItems} />
-                            </div>
+            <div className="flex flex-col w-full max-w-lg h-full bg-white overflow-hidden text-slate-100 font-sans">
+
+                {/* Header */}
+                <div className="flex items-center justify-between px-5 py-4 bg-primary">
+                    <div className="flex items-center gap-2.5">
+                        <div className="p-2">
+                            <ShoppingCart className="w-5 h-5" />
                         </div>
-                    </form>
-                </FormProvider>
+                        <div>
+                            <h2 className="font-semibold text-base text-slate-100">Purchased Items</h2>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Cart Items Scrollable List */}
+                <div className="relative flex-1 overflow-y-auto p-4 space-y-3">
+                    {purchaseLogs.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center h-52 text-slate-500 text-center">
+                            <ShoppingCart className="w-10 h-10 mb-2 stroke-[1.5] opacity-30" />
+                            <p className="text-sm font-medium">Cart is empty</p>
+                            <p className="text-xs text-slate-600">Scan barcodes to add products</p>
+                        </div>
+                    ) : (
+                        purchaseLogs.map((p, i) => (
+                            <div
+                                key={p.barcode || i}
+                                className="flex items-center gap-3 p-3 rounded-3xl bg-white border hover:border-slate-700 transition-all"
+                            >
+                                {/* Product Thumbnail */}
+                                <div className="w-14 h-14 rounded-md bg-white border border-secondary/50 overflow-hidden shrink-0 flex items-center justify-center">
+                                    {p.image ? (
+                                        <img
+                                            src={p.image}
+                                            alt={p.name || "Product"}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <span className="text-xs font-mono text-slate-500">No Img</span>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <p className="text-secondary font-semibold">{p.name}</p>
+                                    <p className="text-secondary">{p.price}</p>
+                                </div>
+
+                                <div className={"bg-secondary rounded-full w-14 h-6 text-center"}>
+                                    <p>{0}</p>
+                                </div>
+
+                                {/* Remove Button */}
+                                <button
+                                    type="button"
+                                    className="p-1.5 rounded-md text-secondary transition-colors"
+                                    title="Remove item"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
+                            </div>
+                        ))
+                    )}
+                </div>
+
+                {/* Footer / Summary */}
+                {text_barcodes.length > 0 && (
+                    <div className="absolute bottom-5 w-1/5 p-4 border-t border-slate-800 bg-slate-900/90 space-y-3">
+                        <div className="flex justify-between items-center text-sm">
+                            <span className="text-slate-400">Total Amount</span>
+                            <span className="text-lg font-bold font-mono text-emerald-400">
+                                ${total.toFixed(2)}
+                            </span>
+                        </div>
+                        <button className="w-full py-2.5 px-4 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-sm transition-colors shadow-lg shadow-emerald-950/40">
+                            Pay Now
+                        </button>
+                    </div>
+                )}
+
             </div>
         </section>
     );
@@ -821,100 +1098,16 @@ const DateInput = () => {
     );
 };
 
-const Cart = ({ cartItems, form }: CartProps) => {
-    const { fields, remove, update } = useFieldArray({
-        control: form.control,
-        name: "products",
-    });
-
-    const formItems = form.watch("products");
-
-    const totalPrice = formItems?.reduce(
-        (sum, p) => sum + p.price * p.quantity,
-        0,
-    );
-
-    const handleRemove = useCallback(
-        (index: number) => () => {
-            remove(index);
-        },
-        [remove],
-    );
-
-    const handleQuantityChange = useCallback(
-        (index: number) => (newQty: number) =>
-            update(index, { ...fields[index], quantity: newQty }),
-        [update, fields],
-    );
+const Cart = ({ cartItems }: CartProps) => {
 
     return (
-        <div>
+        <div className="p-2">
             <div className="border-b py-7">
-                <h2 className="text-lg leading-relaxed font-semibold">Your Cart</h2>
+                <h2 className="text-lg leading-relaxed font-semibold">Cart Items</h2>
             </div>
-            <ul className="space-y-12 py-7 min-h-48">
-                {fields.map((field, index) => {
-                    return (
-                        <li key={field.id}>
-                            <CartItem
-                                {...(cartItems.find(
-                                    (p) => p.product_id === field.product_id,
-                                ) as CartItem)}
-                                onRemoveClick={() => handleRemove(index)()}
-                                onQuantityChange={(newQty: number) =>
-                                    handleQuantityChange(index)(newQty)
-                                }
-                                index={index}
-                            />
-                        </li>
-                    );
-                })}
-            </ul>
-            <div>
-                <div className="space-y-3.5 border-y py-7">
-                    <div className="flex justify-between gap-3">
-                        <p className="text-sm">Subtotal</p>
-                        <Price className="text-sm font-normal">
-                            <PriceValue
-                                price={totalPrice}
-                                currency={cartItems[0].price.currency}
-                                variant="regular"
-                            />
-                        </Price>
-                    </div>
-                    <div className="flex justify-between gap-3">
-                        <p className="text-sm">Shipping</p>
-                        <p className="text-sm">Free</p>
-                    </div>
-                    <div className="flex justify-between gap-3">
-                        <p className="text-sm">Estimated Tax</p>
-                        <p className="text-sm">$35.80</p>
-                    </div>
-                </div>
-                <div className="py-7">
-                    <div className="flex justify-between gap-3">
-                        <p className="text-lg leading-tight font-medium">Total</p>
-                        <Price className="text-xl font-medium">
-                            <PriceValue
-                                price={totalPrice}
-                                currency={cartItems[0].price.currency}
-                                variant="regular"
-                            />
-                        </Price>
-                    </div>
-                    <div>
-                        <div className="bg-soft p-2">
-                            <ul>
-                                <li className="text-secondary text-md">Mpesa</li>
-                                <li className="text-secondary text-md">Debit card</li>
-                                <li className="text-secondary text-md">Airtel money</li>
 
-                            </ul>
-                        </div>
-                        <button className="bg-primary text-white rounded-md p-2 text-md font-bold mt-10">Pay</button>
-                    </div>
-                </div>
-            </div>
+            { }
+
         </div>
     );
 };
@@ -955,7 +1148,7 @@ const CartItem = ({
                             <div>
                                 <Price className="text-sm font-semibold">
                                     <PriceValue
-                                        price={regular}
+                                        price={String(regular)}
                                         currency={currency}
                                         variant="regular"
                                     />

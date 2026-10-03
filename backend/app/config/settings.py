@@ -75,14 +75,14 @@ MIDDLEWARE = [
 ALLOWED_HOSTS = [
     "127.0.0.1",
     "localhost",
-    "0382-102-209-57-213.ngrok-free.app"
+    "b9b8-102-209-57-213.ngrok-free.app"
 ]
 
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1",
     "http://localhost:8000",
     "http://localhost:3000",
-    "https://0382-102-209-57-213.ngrok-free.app"
+    "https://b9b8-102-209-57-213.ngrok-free.app"
 ]
 
 

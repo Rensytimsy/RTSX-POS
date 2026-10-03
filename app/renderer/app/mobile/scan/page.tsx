@@ -8,7 +8,6 @@ export default function MobileScannerComponent() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
-    // Extract query parameters: ?session=term_test123&shop=main-store
     const session = searchParams.get('session');
     const shop = searchParams.get('shop') || 'default';
 
@@ -17,6 +16,8 @@ export default function MobileScannerComponent() {
 
     const socketRef = useRef<WebSocket | null>(null);
     const scanCooldownRef = useRef<boolean>(false);
+
+    console.log(session)
 
     useEffect(() => {
         if (!session) return;
@@ -27,7 +28,7 @@ export default function MobileScannerComponent() {
 
         // If on ngrok and NOT using rewrites, point directly to a second Django ngrok URL
         const host = window.location.host.includes(':3000')
-            ? 'https://0382-102-209-57-213.ngrok-free.app'
+            ? '127.0.0.1'
             : window.location.host;
 
         const socketUrl = `${wsProtocol}//${host}/ws/scanner/${session}/`;
@@ -46,7 +47,7 @@ export default function MobileScannerComponent() {
         let scanner: Html5QrcodeScanner | null = new Html5QrcodeScanner(
             "camera-reader",
             {
-                fps: 15,
+                fps: 30,
                 qrbox: { width: 280, height: 160 },
                 aspectRatio: 1.0,
             },

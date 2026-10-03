@@ -1,0 +1,14 @@
+[
+    {
+        "barcode": "6161106962662",
+        "name": "Nescafe",
+        "price": "10",
+        "stock": "99"
+    },
+    {
+        "barcode": "0745604881814",
+        "name": "Sedoso Baby Jelly",
+        "price": "30",
+        "stock": "12"
+    }
+]

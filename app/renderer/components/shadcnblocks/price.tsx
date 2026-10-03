@@ -14,7 +14,7 @@ interface PriceProps {
 }
 
 interface PriceValueProps {
-  price?: number;
+  price?: string;
   currency?: string;
   variant?: "regular" | "sale";
   className?: string;
@@ -71,7 +71,7 @@ const PriceValue = ({
         className,
       )}
     >
-      {formatCurrency(price, currency)}
+      {formatCurrency(Number(price), currency)}
     </span>
   );
 };

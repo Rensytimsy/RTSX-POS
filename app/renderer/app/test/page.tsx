@@ -13,16 +13,15 @@ export default function POSTerminalScreen() {
         const terminalSession = `term_${Math.random().toString(36).substring(2, 10)}`;
         setSessionId(terminalSession);
 
-        // Open connection to Django Channels
         const socket = new WebSocket(`ws://localhost:8000/ws/scanner/${terminalSession}/`);
 
-        socket.onopen = () => setWsStatus('Online');
-        socket.onclose = () => setWsStatus('Offline');
+        socket.onopen = () => setWsStatus('connected');
+        socket.onclose = () => setWsStatus('disconnected');
 
         socket.onmessage = (event) => {
             const data = JSON.parse(event.data);
+            console.log("data transimitted!")
             if (data.status === 'SUCCESS' && data.barcode) {
-                // Append newly scanned barcode directly to cart
                 setCartItems((prevItems) => [data.barcode, ...prevItems]);
             }
         };
@@ -30,8 +29,10 @@ export default function POSTerminalScreen() {
         return () => socket.close();
     }, []);
 
+    console.log(wsStatus)
+
     // Web pairing URL pointing to hosted scanner route
-    const mobileScannerUrl = `https://39c8-102-209-57-213.ngrok-free.app/mobile/scan?session=${sessionId}&shop=rtstudio-stores`;
+    const mobileScannerUrl = `https://a443-102-209-57-213.ngrok-free.app/mobile/scan?session=${sessionId}&shop=rtstudio-stores`;
 
     return (
         <div style={{ display: 'flex', height: '100vh', fontFamily: 'sans-serif' }}>

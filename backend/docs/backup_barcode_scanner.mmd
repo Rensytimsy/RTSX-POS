@@ -1,0 +1,44 @@
+graph TD
+    %% External Entities
+    Cashier([Cashier Mobile Phone])
+    POS([Nextron Desktop POS])
+
+    %% DFD Level 1 Processes
+    subgraph Django_System [Django Backend & Real-Time Engine]
+        P1((1.0 Validate & Establish Pairing Session))
+        P2((2.0 Capture Barcode & Decode Video))
+        P3((3.0 Route Real-Time Scan Event))
+        P4((4.0 Lookup Product & Update Cart))
+        P5((5.0 Queue Async Audit & Analytics))
+    end
+
+    subgraph Messaging_and_Tasks [Messaging & Background Workers]
+        D1[(DS-1 Active Sessions - Redis/Memcached)]
+        D2[(DS-2 Product & Inventory DB - PostgreSQL/SQLite)]
+        MQ[[RabbitMQ Channel Layer & Queue]]
+        CeleryWorker[[Celery Worker]]
+    end
+
+    %% Data Flows
+    POS -- 1. Request Session QR --> P1
+    P1 -- 2. Store Session Token --> D1
+    P1 -- 3. Render Session URL / QR Code --> POS
+
+    Cashier -- 4. Scan Pairing QR & Open Socket --> P1
+    P1 -- 5. Verify Active Session --> D1
+
+    Cashier -- 6. Raw Camera Stream --> P2
+    P2 -- 7. Decoded Barcode Payload --> P3
+
+    P3 -- 8. Publish Message to Group Room --> MQ
+    MQ -- 9. Broadcast Barcode Event --> P3
+    P3 -- 10. Push WebSocket Barcode Event --> POS
+
+    POS -- 11. Fetch Item Details --> P4
+    P4 -- 12. Query Product Barcode --> D2
+    D2 -- 13. Return Product & Stock Data --> P4
+    P4 -- 14. Update Active Cart State --> POS
+
+    P3 -- 15. Push Audit Task --> MQ
+    MQ -- 16. Consume Task --> CeleryWorker
+    CeleryWorker -- 17. Log Scan Event & Metrics --> D2

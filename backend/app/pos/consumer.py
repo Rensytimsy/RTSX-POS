@@ -3,6 +3,8 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from .tasks import log_barcode_scan_async
 
+# from backend.docs import barcodes
+
 # Helper to offload synchronous Celery calls
 @database_sync_to_async
 def trigger_celery_task(shop_slug, session_id, barcode):
@@ -19,6 +21,8 @@ class PosScannerConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
         await self.accept()
+        print("Connection was successful")
+        # print(barcodes)
         
     async def disconnect(self, close_code):
         if hasattr(self, 'room_group_name'):
@@ -26,32 +30,25 @@ class PosScannerConsumer(AsyncWebsocketConsumer):
                 self.room_group_name,
                 self.channel_name
             )
+            
+            
+            print("Disconnected Succesfully")
+            
+            
         
     async def receive(self, text_data):
-        try:
-            data = json.loads(text_data)
-        except json.JSONDecodeError:
-            return
+        data = json.loads(text_data)
+        barcode = data["barcode"]
+        print("received", data)
         
-        message_type = data.get("type")
-        barcode = data.get("barcode")
-        shop_slug = data.get("shop_slug", "default")
+        await self.channel_layer.group_send(
+            self.room_group_name, {"type": "broadcast.scan.event", "barcode": barcode}
+        )
         
-        if message_type == "SCAN_EVENT" and barcode:
-            # 1. Broadcast to WebSocket group asynchronously
-            await self.channel_layer.group_send(
-                self.room_group_name,
-                {
-                    "type": "broadcast_scan_event",
-                    "barcode": barcode
-                }
-            )
-            
-            # 2. Dispatch Celery task safely without blocking event loop
-            await trigger_celery_task(shop_slug, self.session_id, barcode)
+        
 
     async def broadcast_scan_event(self, event):
+        barcode = event["barcode"]
         await self.send(text_data=json.dumps({
-            "status": "success",
-            "barcode": event['barcode']
+            "barcode": barcode
         }))

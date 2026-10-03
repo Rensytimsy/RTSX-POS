@@ -1,0 +1,16 @@
+django
+django-rest-framework
+django-allauth
+psycopg2-binary
+dj_database_url
+django-cors-headers
+daphne
+channels
+channels_rabbitmq
+qrcode
+pillow
+celery
+redis
+python-decouple
+pysqlite3-binary
+channels_redis
